@@ -1,32 +1,37 @@
-FROM nvidia/cuda:12.4.1-cudnn-runtime-ubuntu22.04 AS base
+FROM nvidia/cuda:12.4.1-cudnn-runtime-ubuntu22.04
 
 ENV HF_HOME=/runpod-volume
+ENV DEBIAN_FRONTEND=noninteractive
 
-# install python and other packages
 RUN apt-get update && apt-get install -y \
     python3.11 \
-    python3-pip \
+    python3.11-venv \
+    python3.11-distutils \
     git \
     wget \
     libgl1 \
-    && ln -sf /usr/bin/python3.11 /usr/bin/python \
-    && ln -sf /usr/bin/pip3 /usr/bin/pip
+    && rm -rf /var/lib/apt/lists/*
 
-# install uv
-RUN pip install uv
+# Make python = python3.11
+RUN ln -sf /usr/bin/python3.11 /usr/local/bin/python
 
-# install python dependencies
+# Install pip for Python 3.11 and upgrade it
+RUN python -m ensurepip --upgrade && python -m pip install --upgrade pip
+
+# Install deps (use the SAME interpreter)
 COPY requirements.txt /requirements.txt
-RUN uv pip install -r /requirements.txt --system
+RUN python -m pip install --no-cache-dir -r /requirements.txt
 
-# install torch
-RUN pip install --no-cache-dir torch==2.5.1 --index-url https://download.pytorch.org/whl/cu124
-RUN python -c "import optimum; import optimum.bettertransformer; print('ok')"
-# Add src files
+# Install torch cu124
+RUN python -m pip install --no-cache-dir torch==2.5.1 --index-url https://download.pytorch.org/whl/cu124
+
+# Pin BetterTransformer-compatible stack (key part)
+RUN python -m pip install --no-cache-dir "optimum<2.0" "transformers<4.49"
+
+# Smoke test
+RUN python -c "import optimum; import optimum.bettertransformer; import transformers; print('ok', optimum.__version__, transformers.__version__)"
+
 ADD src .
-
-# Add test input
 COPY test_input.json /test_input.json
 
-# start the handler
-CMD python -u /handler.py
+CMD ["python", "-u", "/handler.py"]
