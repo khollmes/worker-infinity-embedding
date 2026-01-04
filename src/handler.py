@@ -57,8 +57,8 @@ async def async_generator_handler(job: dict[str, Any]):
             return create_error_response(f"Invalid OpenAI Route: {openai_route}").model_dump()
 
     else:
-        # Standard mode: rerank or embedding
         if job_input.get("query"):
+            print('rerank called')
             call_fn, kwargs = embedding_service.infinity_rerank, {
                 "query": job_input.get("query"),
                 "docs": job_input.get("docs"),
@@ -66,6 +66,7 @@ async def async_generator_handler(job: dict[str, Any]):
                 "model_name": job_input.get("model"),
             }
         elif job_input.get("input"):
+            print('simple embedding')
             call_fn, kwargs = embedding_service.route_openai_get_embeddings, {
                 "embedding_input": job_input.get("input"),
                 "model_name": job_input.get("model"),
@@ -76,7 +77,8 @@ async def async_generator_handler(job: dict[str, Any]):
 
     try:
         out = await call_fn(**kwargs)
-        return _to_jsonable(out)   # <<< KEY FIX
+        print(out)
+        return _to_jsonable(out)   
     except Exception as e:
         return create_error_response(str(e)).model_dump()
 
