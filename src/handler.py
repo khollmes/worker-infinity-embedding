@@ -1,20 +1,5 @@
-import runpod
-import asyncio
 
-async def async_handler(job):
-    for i in range(5):
-        # Generate an asynchronous output token
-        output = f"Generated async token output {i}"
-        yield output
-        
-        # Simulate an asynchronous task
-        await asyncio.sleep(1)
-        
-runpod.serverless.start({
-    "handler": async_handler,
-    "return_aggregate_stream": True
-})
-"""
+
 import runpod
 from utils import create_error_response
 from typing import Any
@@ -101,4 +86,4 @@ if __name__ == "__main__":
             "concurrency_modifier": lambda x: embedding_service.config.runpod_max_concurrency,
         }
     )
-"""
+
