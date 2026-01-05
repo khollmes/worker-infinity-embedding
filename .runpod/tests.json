@@ -12,7 +12,7 @@
         ],
         "return_docs": true
       },
-      "timeout": 20000
+      "timeout": 1200000
     }
   ],
   "config": {
