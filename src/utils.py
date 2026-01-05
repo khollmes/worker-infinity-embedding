@@ -139,27 +139,36 @@ def list_embeddings_to_response(
         usage=dict(prompt_tokens=usage, total_tokens=usage),
     )
     
+def _coerce_score(score: Any) -> float:
+    """Return a plain float from various score container types."""
+    if hasattr(score, "relevance_score"):
+        score = getattr(score, "relevance_score")
+    if isinstance(score, np.generic):
+        return float(score)
+    return float(score)
+
+
 def to_rerank_response(
-    scores: List[float],
+    scores: List[Any],
     model=str,
     usage=int,
     documents: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
+    coerced_scores = [_coerce_score(s) for s in scores]
+
     if documents is None:
-        return dict(
-            model=model,
-            results=[
-                dict(relevance_score=score, index=count)
-                for count, score in enumerate(scores)
-            ],
-            usage=dict(prompt_tokens=usage, total_tokens=usage),
-        )
+        results = [
+            dict(relevance_score=score, index=count)
+            for count, score in enumerate(coerced_scores)
+        ]
     else:
-        return dict(
-            model=model,
-            results=[
-                dict(relevance_score=score, index=count, document=doc)
-                for count, (score, doc) in enumerate(zip(scores, documents))
-            ],
-            usage=dict(prompt_tokens=usage, total_tokens=usage),
-        )
+        results = [
+            dict(relevance_score=score, index=count, document=doc)
+            for count, (score, doc) in enumerate(zip(coerced_scores, documents))
+        ]
+
+    return dict(
+        model=model,
+        results=results,
+        usage=dict(prompt_tokens=usage, total_tokens=usage),
+    )
