@@ -28,11 +28,21 @@ RUN python -m pip install --no-cache-dir \
 
 # 2) Install your remaining deps (WITHOUT torch/torchvision/torchaudio pins here)
 COPY requirements.txt /requirements.txt
+
+# install from requirements (this previously pulled torch 2.9.1 + matching torchvision)
 RUN python -m pip install --no-cache-dir -r /requirements.txt
 
-# 3) Smoke test (don’t force-import vision subsystems)
-RUN python -c "import torch, torchvision; print('torch', torch.__version__, 'vision', torchvision.__version__)"
+# (removed) explicit torch downgrade that caused mismatch with torchvision:
+# RUN python -m pip install --no-cache-dir torch==2.5.1 --index-url https://download.pytorch.org/whl/cu124
+
+# Install optimum/transformers (keeps whatever torch/torchvision are already installed)
+RUN python -m pip install --no-cache-dir "optimum<2.0" "transformers<4.49"
+
+# Sanity check: verify torch/torchvision/transformers/optimum import and print versions
+RUN python -c "import torch, torchvision, optimum, transformers; print('ok', torch.__version__, torchvision.__version__, optimum.__version__, transformers.__version__)"
 
 ADD src .
+
+
 COPY test_input.json /test_input.json
 CMD ["python", "-u", "/handler.py"]
