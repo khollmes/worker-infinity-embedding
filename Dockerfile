@@ -20,7 +20,10 @@ COPY requirements.txt /requirements.txt
 RUN uv pip install -r /requirements.txt --system
 
 # install torch
-RUN pip install torch==2.5.1+cu124 --index-url https://download.pytorch.org/whl/test/cu124 --no-cache-dir
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir \
+    torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 \
+    --index-url https://download.pytorch.org/whl/cu124
 
 # Add src files
 ADD src .
