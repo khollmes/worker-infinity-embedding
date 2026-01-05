@@ -39,7 +39,7 @@ All behaviour is controlled through environment variables:
 | ------------------------ | -------- | ------- | ---------------------------------------------------------------------------------------------------------------- |
 | `MODEL_NAMES`            | **Yes**  | —       | One or more Hugging-Face model IDs. Separate multiple IDs with a semicolon.<br>Example: `BAAI/bge-small-en-v1.5` |
 | `BATCH_SIZES`            | No       | `32`    | Per-model batch size; semicolon-separated list matching `MODEL_NAMES`.                                           |
-| `BACKEND`                | No       | `torch` | Inference engine for _all_ models: `torch`, `optimum`, or `ctranslate2`.                                         |
+| `BACKEND`                | No       | `torch` | Inference engine for _all_ models: `torch` or `ctranslate2`.                                                     |
 | `DTYPES`                 | No       | `auto`  | Precision per model (`auto`, `fp16`, `fp8`). Semicolon-separated, must match `MODEL_NAMES`.                      |
 | `INFINITY_QUEUE_SIZE`    | No       | `48000` | Max items queueable inside the Infinity engine.                                                                  |
 | `RUNPOD_MAX_CONCURRENCY` | No       | `300`   | Max concurrent requests the RunPod wrapper will accept.                                                          |
