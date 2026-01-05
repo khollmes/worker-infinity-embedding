@@ -27,8 +27,11 @@ def _to_jsonable(x):
 
 async def async_generator_handler(job: dict[str, Any]):
     job_input = job.get("input", {})
-    print('test is in')
+    state_i = 'async has started'
+    yield state_i
     if job_input.get("openai_route"):
+        op= "openai_route":
+        yield op
         openai_route = job_input.get("openai_route")
         openai_input = job_input.get("openai_input")
 
@@ -62,7 +65,8 @@ async def async_generator_handler(job: dict[str, Any]):
                 "model_name": job_input.get("model"),
             }
         elif job_input.get("input"):
-            print('simple embedding')
+            shh="should print shh at the very least"
+            yield shh
             call_fn, kwargs = embedding_service.route_openai_get_embeddings, {
                 "embedding_input": job_input.get("input"),
                 "model_name": job_input.get("model"),
@@ -73,7 +77,8 @@ async def async_generator_handler(job: dict[str, Any]):
 
     try:
         out = await call_fn(**kwargs)
-        print(out)
+        out_json = _to_jsonable(out) 
+        yield out_json
         return _to_jsonable(out)   
     except Exception as e:
         return create_error_response(str(e)).model_dump()
