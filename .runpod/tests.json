@@ -1,9 +1,18 @@
 {
   "tests": [
     {
-      "name": "Super_basic_test",
-       "input": { "openai_route": "/v1/models" } ,
-      "timeout": 30
+      "name": "Reranking Request",
+      "input": {
+        "model": "BAAI/bge-reranker-v2-m3",
+        "query": "warranty coverage",
+        "docs": [
+          "Product A has 2-year warranty",
+          "Product B is available in red and blue",
+          "All electronics include standard 1-year warranty"
+        ],
+        "return_docs": true
+      },
+      "timeout": 20000
     }
   ],
   "config": {
@@ -13,7 +22,7 @@
     "env": [
       {
         "key": "MODEL_NAMES",
-        "value": "baai/bge-m3"
+        "value": "BAAI/bge-reranker-v2-m3"
       }
     ]
   }
