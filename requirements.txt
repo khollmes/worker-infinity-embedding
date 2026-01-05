@@ -1,5 +1,5 @@
 runpod~=1.7.0
-infinity-emb[all]==0.0.77
+infinity-emb[torch,optimum]==0.0.77
 einops # deployment of custom code with nomic
 optimum<2.0
 transformers<4.49
