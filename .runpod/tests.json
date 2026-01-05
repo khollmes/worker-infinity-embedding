@@ -2,10 +2,7 @@
   "tests": [
     {
       "name": "Super_basic_test",
-      "input": {
-        "model": "baai/bge-m3",
-        "input": "Hello, world!"
-      },
+       "input": { "openai_route": "/v1/models" } ,
       "timeout": 30
     }
   ],
