@@ -20,7 +20,7 @@ def get_embedding_service() -> EmbeddingService:
             _embedding_service = EmbeddingService()
             log.info("EmbeddingService initialized")
         except Exception as e:
-            log.exception(f"EmbeddingService startup failed: {e}")
+            log.info(f"EmbeddingService startup failed: {e}")
             # re-raise so caller knows initialization failed
             raise
     return _embedding_service
@@ -36,7 +36,6 @@ def _to_jsonable(x):
     if hasattr(x, "__dict__"):
         return x.__dict__
     return {"value": str(x)}
-
 
 class InputModel(BaseModel):
     # Use input_ as the attribute name and accept "input" from incoming dict
@@ -57,12 +56,12 @@ async def async_generator_handler(job: dict[str, Any]):
         job_input = InputModel.parse_obj(raw_input)
     except ValidationError as ve:
         err_msg = f"Invalid job input: {ve}"
-        log.exception(err_msg)
+        log.info(err_msg)
         yield _to_jsonable(create_error_response(err_msg).model_dump())
         return
     except Exception as e:
         # Unexpected error during parsing
-        log.exception(f"Unexpected error parsing input: {e}")
+        log.info(f"Unexpected error parsing input: {e}")
         yield _to_jsonable(create_error_response(str(e)).model_dump())
         return
 
@@ -133,7 +132,7 @@ async def async_generator_handler(job: dict[str, Any]):
         yield out_json
         return
     except Exception as e:
-        log.exception("handler error during execution")
+        log.info("handler error during execution")
         yield _to_jsonable(create_error_response(str(e)).model_dump())
         return
 
@@ -144,7 +143,7 @@ if __name__ == "__main__":
 try:
     es = get_embedding_service()
 except Exception:
-    log.exception("failed to initialize embedding service in __main__")
+    log.info("failed to initialize embedding service in __main__")
     raise
 
 runpod.serverless.start(
