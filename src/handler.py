@@ -1,12 +1,14 @@
 import runpod
-print('test')
+from runpod import RunPodLogger
+log = RunPodLogger()
+log.info("Early test for debugging")
+
 from utils import create_error_response
 from typing import Any, Optional, List, Union
 from embedding_service import EmbeddingService
-from runpod import RunPodLogger
 from pydantic import BaseModel, Field, ValidationError
 
-log = RunPodLogger()
+
 log.info("handler module imported")
 
 # Lazy init instead of creating at import time
