@@ -95,13 +95,16 @@ async def async_generator_handler(job: dict[str, Any]):
 
     # handle other input types
     else:
+        
         if job_input.query:
+            
             call_fn, kwargs = embedding_service.infinity_rerank, {
                 "query": job_input.query,
                 "docs": job_input.docs,
                 "return_docs": job_input.return_docs or False,
                 "model_name": job_input.model,
             }
+            log.info(f"rerank returns: call_fn: {call_fn}, \nkwargs: {kwargs}")
         elif job_input.input_ is not None:
             call_fn, kwargs = embedding_service.route_openai_get_embeddings, {
                 "embedding_input": job_input.input_,
