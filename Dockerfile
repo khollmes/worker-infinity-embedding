@@ -23,6 +23,4 @@ RUN pip install --no-cache-dir \
 
 ADD src .
 
-COPY test_input.json /test_input.json
-
 CMD python -u /handler.py
