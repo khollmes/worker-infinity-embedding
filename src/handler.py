@@ -60,20 +60,17 @@ async def async_generator_handler(job: dict[str, Any]):
     except ValidationError as ve:
         err_msg = f"Invalid job input: {ve}"
         log.info(err_msg)
-        yield _to_jsonable(create_error_response(err_msg).model_dump())
-        return
+        raise ValueError(err_msg)
     except Exception as e:
         # Unexpected error during parsing
         log.info(f"Unexpected error parsing input: {e}")
-        yield _to_jsonable(create_error_response(str(e)).model_dump())
-        return
+        raise RuntimeError(str(e))
 
     # now get the embedding service (may raise, and will be logged by get_embedding_service)
     try:
         embedding_service = get_embedding_service()
     except Exception as e:
-        yield _to_jsonable(create_error_response(f"service init failed: {e}").model_dump())
-        return
+        raise RuntimeError(f"service init failed: {e}") from e
 
     # keep client informed that the async job started
     log.info("in async_generator_handler (after validation)")
@@ -85,8 +82,7 @@ async def async_generator_handler(job: dict[str, Any]):
         openai_input = job_input.openai_input
 
         if not openai_input:
-            yield _to_jsonable(create_error_response("Missing openai_input").model_dump())
-            return
+            raise ValueError("Missing openai_input")
 
         if openai_route == "/v1/models":
             call_fn, kwargs = embedding_service.route_openai_models, {}
@@ -94,8 +90,7 @@ async def async_generator_handler(job: dict[str, Any]):
         elif openai_route == "/v1/embeddings":
             model_name = openai_input.get("model")
             if not model_name:
-                yield _to_jsonable(create_error_response("Did not specify model in openai_input").model_dump())
-                return
+                raise ValueError("Did not specify model in openai_input")
 
             call_fn, kwargs = embedding_service.route_openai_get_embeddings, {
                 "embedding_input": openai_input.get("input"),
@@ -104,8 +99,7 @@ async def async_generator_handler(job: dict[str, Any]):
             }
 
         else:
-            yield _to_jsonable(create_error_response(f"Invalid OpenAI Route: {openai_route}").model_dump())
-            return
+            raise ValueError(f"Invalid OpenAI Route: {openai_route}")
 
     # handle other input types
     else:
@@ -125,8 +119,7 @@ async def async_generator_handler(job: dict[str, Any]):
                 "return_as_list": True,
             }
         else:
-            yield _to_jsonable(create_error_response(f"Invalid input: {job}").model_dump())
-            return
+            raise ValueError(f"Invalid input: {job}")
 
     # execute the chosen function and stream the result
     try:
@@ -136,8 +129,7 @@ async def async_generator_handler(job: dict[str, Any]):
         return
     except Exception as e:
         log.info("handler error during execution")
-        yield _to_jsonable(create_error_response(str(e)).model_dump())
-        return
+        raise RuntimeError(str(e)) from e
 
 
 if __name__ == "__main__":
@@ -153,5 +145,6 @@ if __name__ == "__main__":
         {
             "handler": async_generator_handler,
             "concurrency_modifier": lambda x: es.config.runpod_max_concurrency,
+            "return_aggregate_stream": True,
         }
     )
