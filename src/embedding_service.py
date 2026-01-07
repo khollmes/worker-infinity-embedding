@@ -1,6 +1,6 @@
 
 import os
-os.environ["INFINITY_DISABLE_OPTIMUM"] = "TRUE" 
+
 
 import runpod
 from runpod import RunPodLogger
@@ -20,6 +20,7 @@ import asyncio
 
 class EmbeddingService:
     def __init__(self):
+        os.environ["INFINITY_DISABLE_OPTIMUM"] = "TRUE" 
         self.config = EmbeddingServiceConfig()
         engine_args = []
         for model_name, batch_size, dtype in zip(
