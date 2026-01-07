@@ -1,7 +1,6 @@
 import runpod
 from runpod import RunPodLogger
 log = RunPodLogger()
-log.info("Early test for debugging")
 
 from utils import create_error_response
 from typing import Any, Optional, List, Union
@@ -9,7 +8,6 @@ from embedding_service import EmbeddingService
 from pydantic import BaseModel, Field, ValidationError
 
 
-log.info("handler module imported")
 
 # Lazy init instead of creating at import time
 _embedding_service: Optional[EmbeddingService] = None
@@ -18,10 +16,8 @@ _embedding_service: Optional[EmbeddingService] = None
 def get_embedding_service() -> EmbeddingService:
     global _embedding_service
     if _embedding_service is None:
-        log.info("initializing EmbeddingService...")
         try:
             _embedding_service = EmbeddingService()
-            log.info("EmbeddingService initialized")
         except Exception as e:
             log.info(f"EmbeddingService startup failed: {e}")
             # re-raise so caller knows initialization failed
@@ -104,7 +100,6 @@ async def async_generator_handler(job: dict[str, Any]):
     # handle other input types
     else:
         if job_input.query:
-            log.info("in rerank")
             call_fn, kwargs = embedding_service.infinity_rerank, {
                 "query": job_input.query,
                 "docs": job_input.docs,
@@ -112,7 +107,6 @@ async def async_generator_handler(job: dict[str, Any]):
                 "model_name": job_input.model,
             }
         elif job_input.input_ is not None:
-            log.info("in embedding")
             call_fn, kwargs = embedding_service.route_openai_get_embeddings, {
                 "embedding_input": job_input.input_,
                 "model_name": job_input.model,
@@ -133,8 +127,7 @@ async def async_generator_handler(job: dict[str, Any]):
 
 
 if __name__ == "__main__":
-    log.info("in main")
-    # ensure embedding service is created when running standalone so concurrency lambda can access config
+    
     try:
         es = get_embedding_service()
     except Exception:
